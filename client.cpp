@@ -1,6 +1,7 @@
 #include <openssl/sha.h>
 #include <openssl/hmac.h>
 
+#include <iomanip>
 #include <iostream>
 #include <string>
 #include <string_view>
@@ -14,7 +15,7 @@ std::string CalcHmacSHA256(std::string_view decodedKey, std::string_view msg)
     unsigned int hashLen;
 
     HMAC(
-        EVP_sha256(),
+        EVP_sha1(),
         decodedKey.data(),
         static_cast<int>(decodedKey.size()),
         reinterpret_cast<unsigned char const*>(msg.data()),
@@ -22,15 +23,17 @@ std::string CalcHmacSHA256(std::string_view decodedKey, std::string_view msg)
         hash.data(),
         &hashLen
     );
-
-    return std::string{reinterpret_cast<char const*>(hash.data()), hashLen};
+    std::stringstream out;
+    for (unsigned int i=0; i < hashLen; i++) {
+        out << std::setfill('0') << std::setw(2) << std::right << std::hex << (int)hash.data()[i];
+    }
+    return out.str();
 }
 
 int main(int argc, char **argv){
-  cout << "Hello" << endl;
-  string_view key = "pokemon";
-  string_view msg = "abcd";
-  std::string result = CalcHmacSHA256(key, msg);
-  cout << result << endl;
-  return 1;
+    std::string key = "Pokemon";
+    std::string msg = "foo";
+    std::string_view key_view{key};
+    std::string_view msg_view{msg};
+    std::cout << CalcHmacSHA256(key_view, msg_view) << std::endl;
 }
