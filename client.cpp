@@ -62,9 +62,7 @@ void GeneratePropertiesFile(string fileName, char* key){
 
 void InitializeConnection(char* key){
   string clientPropertiesFile = "ClientProperties.txt";
-  string serverPropertiesFile = "ServerProperties.txt";
   GeneratePropertiesFile(clientPropertiesFile, key);
-  GeneratePropertiesFile(serverPropertiesFile, key);
 }
 
 int main(int argc, char **argv){
@@ -81,11 +79,12 @@ int main(int argc, char **argv){
       memset(send_buf, '\0', sizeof(send_buf));
   char* send_content;
   if(argc == 2){
-    if(strcmp(argv[1],"initialize")){
+    char* init = (char*)"initialize";
+    if(strcmp(argv[1], init)){
       cout << "Initializing connection!" << endl;
       GenerateHexString(key, length);
       InitializeConnection(key);
-      send_content = (char*)"Initialize";
+      send_content = init;
       strcpy(send_buf, send_content);
       strcat(send_buf, "\n");
       strcat(send_buf, key);
