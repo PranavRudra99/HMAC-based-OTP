@@ -50,11 +50,6 @@ void GeneratePropertiesFile(string fileName, char* key){
   PropertiesFile.close();
 }
 
-void InitializeConnection(char* key){
-  string serverPropertiesFile = "ServerProperties.txt";
-  GeneratePropertiesFile(serverPropertiesFile, key);
-}
-
 bool IsInitializtionStep(char* buf, char* init){
   std::stringstream strstream(buf);
   std::string str;
@@ -79,6 +74,7 @@ int main(int argc, char **argv){
 	server_addr.sin_port=htons(8000); 		// server port
 	
     char* init = (char*)"initialize";
+    string serverPropertiesFile = "ServerProperties.txt";
 	/* create socket fd with IPv4 and TCP protocal*/
 	if((server_sockfd=socket(PF_INET,SOCK_STREAM,0))<0) {  
 					perror("socket error");
@@ -118,7 +114,7 @@ int main(int argc, char **argv){
 
 		while(recv(conn, recv_buf, sizeof(recv_buf), 0) > 0 ){
 		        if(IsInitializtionStep(recv_buf, init)){
-		          InitializeConnection((char*)key.c_str());
+                          GeneratePropertiesFile(serverPropertiesFile, (char*)key.c_str());
 		        }
 			memset(recv_buf, '\0', strlen(recv_buf));
 			break;

@@ -51,8 +51,7 @@ void GenerateHexString(char str[], int length)
   str[length]=0;
 }
 
-void GeneratePropertiesFile(string fileName, char* key){
-  int count = 0;
+void GeneratePropertiesFile(string fileName, char* key, int count){
   ofstream PropertiesFile(fileName);
   PropertiesFile << key;
   PropertiesFile << endl;
@@ -60,15 +59,19 @@ void GeneratePropertiesFile(string fileName, char* key){
   PropertiesFile.close();
 }
 
-void InitializeConnection(char* key){
-  string clientPropertiesFile = "ClientProperties.txt";
-  GeneratePropertiesFile(clientPropertiesFile, key);
+string GetHmacSHAValue(string key, string msg){
+    std::string_view key_view{key};
+    std::string_view msg_view{msg};
+    return CalcHmacSHA(key_view, msg_view);
+}
+
+void UpdatePropertiesFile(string fileName, string key, string count){
+  int updatedCount = atoi(count.c_str()) + 1;
+  GeneratePropertiesFile(fileName, (char*)key.c_str(), updatedCount);
 }
 
 int main(int argc, char **argv){
   string msg = "";
-  int length = 20;
-  char key[length];
   struct sockaddr_in server_addr;     // set server addr and port
       memset(&server_addr, 0, sizeof(server_addr));
       server_addr.sin_family = AF_INET;
@@ -78,12 +81,31 @@ int main(int argc, char **argv){
   char send_buf[65536];
       memset(send_buf, '\0', sizeof(send_buf));
   char* send_content;
+  string clientPropertiesFile = "ClientProperties.txt";
+  if(argc == 1){
+    ifstream PropertiesFile(clientPropertiesFile); 
+    if(PropertiesFile.good()){
+      string count;
+      string storedKey;
+      getline(PropertiesFile, storedKey, '\n');
+      getline(PropertiesFile, count, '\n');
+      string HMACShaCode = GetHmacSHAValue(storedKey, count);
+      cout <<"HMAC-SHA1 Code:"<< HMACShaCode << endl;
+      UpdatePropertiesFile(clientPropertiesFile, storedKey, count);
+    }
+    else{
+      cout << "Need Initialization!" << endl;
+      return -1;
+    }
+  }
   if(argc == 2){
     char* init = (char*)"initialize";
     if(strcmp(argv[1], init)){
+      int length = 20;
+      char key[length];
       cout << "Initializing connection!" << endl;
       GenerateHexString(key, length);
-      InitializeConnection(key);
+      GeneratePropertiesFile(clientPropertiesFile, key, 0);
       send_content = init;
       strcpy(send_buf, send_content);
       strcat(send_buf, "\n");
@@ -111,8 +133,4 @@ int main(int argc, char **argv){
   close(sock_client);
 
   return 0;
-    /*std::string_view key_view{key};
-    std::string_view msg_view{msg};
-    std::cout << CalcHmacSHA(key_view, msg_view) << std::endl;*/
 }
-
