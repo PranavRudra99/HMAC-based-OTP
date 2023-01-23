@@ -95,6 +95,39 @@ string GetUnsignedValue(string code){
   return unsignedChar + substr;
 }
 
+string GetPaddedString(int val){
+  if(val == 0){
+    return "000000";
+  }
+  if(val < 10){
+    return "00000" + std::to_string(val); 
+  }
+  if(val < 100){
+    return "0000" + std::to_string(val); 
+  }
+  if(val < 1000){
+    return "000" + std::to_string(val); 
+  }
+  if(val < 10000){
+    return "00" + std::to_string(val); 
+  }
+  if(val < 100000){
+    return "0" + std::to_string(val);
+  }
+  return std::to_string(val);
+}
+
+string GetOTP(string HexString){
+    unsigned int value;
+    int mod = 1000000;
+    std::istringstream iss(HexString);
+    iss >> std::hex >> value;
+    std::cout << value << std::endl;
+    int val = value%mod;
+    string otp = GetPaddedString(val);
+    return otp;
+}
+
 string TruncateHMACSHACode(string HMACSHACode){
   char c = HMACSHACode[39];
   int index = GetIntValueOfHex(c);
@@ -128,7 +161,11 @@ int main(int argc, char **argv){
       string HMACSHACode = GetHmacSHAValue(storedKey, count);
       cout <<"HMAC-SHA1 Code:"<< HMACSHACode << endl;
       //UpdatePropertiesFile(clientPropertiesFile, storedKey, count); /*uncomment*/
-      TruncateHMACSHACode(HMACSHACode);
+      //HMACSHACode = "ffffffffe6f7e1af99f9dcdf6227467b8abce9c0";
+      //HMACSHACode = "00000000e6f7e1af99f9dcdf6227467b8abce9c0";
+      string TruncatedCode = TruncateHMACSHACode(HMACSHACode);
+      string OPTCode = GetOTP(TruncatedCode);
+      cout << OPTCode << endl;
     }
     else{
       cout << "Need Initialization!" << endl;
