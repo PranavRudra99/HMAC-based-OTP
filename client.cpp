@@ -18,6 +18,8 @@
 
 using namespace std;
 
+char hex_characters[]={'0','1','2','3','4','5','6','7','8','9','a','b','c','d','e','f'};
+
 std::string CalcHmacSHA(std::string_view decodedKey, std::string_view msg)
 {
     std::array<unsigned char, EVP_MAX_MD_SIZE> hash;
@@ -41,7 +43,6 @@ std::string CalcHmacSHA(std::string_view decodedKey, std::string_view msg)
 
 void GenerateHexString(char str[], int length)
 {
-  char hex_characters[]={'0','1','2','3','4','5','6','7','8','9','A','B','C','D','E','F'};
   int i;
   srand(time(0));
   for(i=0;i<length;i++)
@@ -49,6 +50,15 @@ void GenerateHexString(char str[], int length)
     str[i]=hex_characters[rand()%16];
   }
   str[length]=0;
+}
+
+int GetIntValueOfHex(char character){
+  for(int i = 0; i < 16; i++){
+    if(character == hex_characters[i]){
+      return i;
+    }
+  }
+  return -1;
 }
 
 void GeneratePropertiesFile(string fileName, char* key, int count){
@@ -70,6 +80,32 @@ void UpdatePropertiesFile(string fileName, string key, string count){
   GeneratePropertiesFile(fileName, (char*)key.c_str(), updatedCount);
 }
 
+char getReducedValue(char character){
+  int intVal = GetIntValueOfHex(character);
+  if(intVal > 7){
+    intVal = intVal - 8;
+  }
+  return hex_characters[intVal];
+}
+
+string GetUnsignedValue(string code){
+  char firstChar = code[0];
+  char unsignedChar = getReducedValue(firstChar);
+  string substr = code.substr(1, 7);
+  return unsignedChar + substr;
+}
+
+string TruncateHMACSHACode(string HMACSHACode){
+  char c = HMACSHACode[39];
+  int index = GetIntValueOfHex(c);
+  index *=2;
+  string ReducedCode = HMACSHACode.substr(index, 8);
+  cout << ReducedCode << endl;
+  string unsignedValue = GetUnsignedValue(ReducedCode);
+  cout << unsignedValue << endl;
+  return unsignedValue;
+}
+
 int main(int argc, char **argv){
   string msg = "";
   struct sockaddr_in server_addr;     // set server addr and port
@@ -89,9 +125,10 @@ int main(int argc, char **argv){
       string storedKey;
       getline(PropertiesFile, storedKey, '\n');
       getline(PropertiesFile, count, '\n');
-      string HMACShaCode = GetHmacSHAValue(storedKey, count);
-      cout <<"HMAC-SHA1 Code:"<< HMACShaCode << endl;
-      UpdatePropertiesFile(clientPropertiesFile, storedKey, count);
+      string HMACSHACode = GetHmacSHAValue(storedKey, count);
+      cout <<"HMAC-SHA1 Code:"<< HMACSHACode << endl;
+      //UpdatePropertiesFile(clientPropertiesFile, storedKey, count); /*uncomment*/
+      TruncateHMACSHACode(HMACSHACode);
     }
     else{
       cout << "Need Initialization!" << endl;
@@ -101,7 +138,7 @@ int main(int argc, char **argv){
   if(argc == 2){
     char* init = (char*)"initialize";
     if(strcmp(argv[1], init)){
-      int length = 20;
+      int length = 40;
       char key[length];
       cout << "Initializing connection!" << endl;
       GenerateHexString(key, length);
