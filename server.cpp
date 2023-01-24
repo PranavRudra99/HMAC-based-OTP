@@ -126,9 +126,9 @@ string TruncateHMACSHACode(string HMACSHACode){
   int index = GetIntValueOfHex(c);
   index *=2;
   string ReducedCode = HMACSHACode.substr(index, 8);
-  cout << ReducedCode << endl;
+  //cout << ReducedCode << endl;
   string unsignedValue = GetUnsignedValue(ReducedCode);
-  cout << unsignedValue << endl;
+  //cout << unsignedValue << endl;
   return unsignedValue;
 }
 
@@ -159,7 +159,7 @@ string GetOTP(string HexString){
     int mod = 1000000;
     std::istringstream iss(HexString);
     iss >> std::hex >> value;
-    std::cout << value << std::endl;
+    //std::cout << value << std::endl;
     int val = value%mod;
     string otp = GetPaddedString(val);
     return otp;
@@ -236,9 +236,18 @@ int main(int argc, char **argv){
                           GeneratePropertiesFile(serverPropertiesFile, (char*)key.c_str());
 		        }
 		        else{
+                          char send_buf[65536];
+                          memset(send_buf, '\0', sizeof(send_buf));
 		          string ReceivedOTPCode = GetOTP(recv_buf);
 		          cout << "Received OTP:" << ReceivedOTPCode << endl;
 		          string CalculatedOTPCode = CalculateOTP(serverPropertiesFile);
+		          if(CalculatedOTPCode == ReceivedOTPCode){
+		            strcpy(send_buf, "Accepted");
+		          }
+		          else{
+		            strcpy(send_buf, "Rejected");
+		          }
+		          send(conn, send_buf, strlen(send_buf), 0);
 		        }
 			memset(recv_buf, '\0', strlen(recv_buf));
 			break;

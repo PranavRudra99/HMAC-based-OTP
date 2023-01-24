@@ -122,7 +122,6 @@ string GetOTP(string HexString){
     int mod = 1000000;
     std::istringstream iss(HexString);
     iss >> std::hex >> value;
-    std::cout << value << std::endl;
     int val = value%mod;
     string otp = GetPaddedString(val);
     return otp;
@@ -133,9 +132,9 @@ string TruncateHMACSHACode(string HMACSHACode){
   int index = GetIntValueOfHex(c);
   index *=2;
   string ReducedCode = HMACSHACode.substr(index, 8);
-  cout << ReducedCode << endl;
+  //cout << ReducedCode << endl;
   string unsignedValue = GetUnsignedValue(ReducedCode);
-  cout << unsignedValue << endl;
+  //cout << unsignedValue << endl;
   return unsignedValue;
 }
 
@@ -171,11 +170,39 @@ int main(int argc, char **argv){
       memset(send_buf, '\0', sizeof(send_buf));
   char* send_content;
   string clientPropertiesFile = "ClientProperties.txt";
+  if ((sock_client = socket(AF_INET,SOCK_STREAM, 0)) < 0) {
+      return 0;
+  }
+
+    //connect server, return 0 with success, return -1 with error
+  if (connect(sock_client, (struct sockaddr *)&server_addr, sizeof(server_addr)) < 0)
+  {
+      perror("connect");
+      return 0;
+  }
   if(argc == 1){
     ifstream PropertiesFile(clientPropertiesFile); 
     if(PropertiesFile.good()){
       string OTPCode = CalculateOTP(clientPropertiesFile);
       strcpy(send_buf, OTPCode.c_str());
+      char server_ip[INET_ADDRSTRLEN]="";
+      inet_ntop(AF_INET, &server_addr.sin_addr, server_ip, INET_ADDRSTRLEN);
+      printf("connected server(%s:%d). \n", server_ip, ntohs(server_addr.sin_port));
+      send(sock_client, send_buf, strlen(send_buf), 0);
+      char recv_buf[65536];
+      memset(recv_buf, '\0', sizeof(recv_buf));
+      while(1){
+        while(recv(sock_client, recv_buf, sizeof(recv_buf), 0) > 0 ){
+          std::stringstream strstream(recv_buf);
+          std::string str = "";
+          if(recv_buf != NULL){
+            std::getline(strstream, str, '\n');
+            cout <<"Response from server:"<< str << endl;
+            close(sock_client);
+            return 1;
+          }
+        }
+      }
     }
     else{
       cout << "Need Initialization!" << endl;
@@ -194,27 +221,18 @@ int main(int argc, char **argv){
       strcpy(send_buf, send_content);
       strcat(send_buf, "\n");
       strcat(send_buf, key);
-    }
-  }
-  
-  if ((sock_client = socket(AF_INET,SOCK_STREAM, 0)) < 0) {
-      return 0;
-  }
-
-    //connect server, return 0 with success, return -1 with error
-  if (connect(sock_client, (struct sockaddr *)&server_addr, sizeof(server_addr)) < 0)
-  {
-      perror("connect");
-      return 0;
-  }
-
-  char server_ip[INET_ADDRSTRLEN]="";
-  inet_ntop(AF_INET, &server_addr.sin_addr, server_ip, INET_ADDRSTRLEN);
-  printf("connected server(%s:%d). \n", server_ip, ntohs(server_addr.sin_port));
+      
+      char server_ip[INET_ADDRSTRLEN]="";
+      inet_ntop(AF_INET, &server_addr.sin_addr, server_ip, INET_ADDRSTRLEN);
+      printf("connected server(%s:%d). \n", server_ip, ntohs(server_addr.sin_port));
 
   //send a message to server
   send(sock_client, send_buf, strlen(send_buf), 0);
   close(sock_client);
 
+    }
+  }
+  
+  
   return 0;
 }
