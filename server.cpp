@@ -108,6 +108,19 @@ string GetHmacSHAValue(string key, string msg){
     return CalcHmacSHA(key_view, msg_view);
 }
 
+void GeneratePropertiesFile(string fileName, char* key, int count){
+  ofstream PropertiesFile(fileName);
+  PropertiesFile << key;
+  PropertiesFile << endl;
+  PropertiesFile << count;
+  PropertiesFile.close();
+}
+
+void UpdatePropertiesFile(string fileName, string key, string count){
+  int updatedCount = atoi(count.c_str()) + 1;
+  GeneratePropertiesFile(fileName, (char*)key.c_str(), updatedCount);
+}
+
 string TruncateHMACSHACode(string HMACSHACode){
   char c = HMACSHACode[39];
   int index = GetIntValueOfHex(c);
@@ -161,7 +174,7 @@ ifstream PropertiesFile(propertiesFileName);
     getline(PropertiesFile, count, '\n');
     string HMACSHACode = GetHmacSHAValue(storedKey, count);
     cout <<"HMAC-SHA1 Code:"<< HMACSHACode << endl;
-    //UpdatePropertiesFile(propertiesFileName, storedKey, count); /*uncomment*/
+    UpdatePropertiesFile(propertiesFileName, storedKey, count); /*uncomment*/
     //HMACSHACode = "ffffffffe6f7e1af99f9dcdf6227467b8abce9c0";
     //HMACSHACode = "00000000e6f7e1af99f9dcdf6227467b8abce9c0";
     string TruncatedCode = TruncateHMACSHACode(HMACSHACode);
