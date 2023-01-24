@@ -139,6 +139,26 @@ string TruncateHMACSHACode(string HMACSHACode){
   return unsignedValue;
 }
 
+string CalculateOTP(string propertiesFileName){
+ifstream PropertiesFile(propertiesFileName); 
+  if(PropertiesFile.good()){
+    string count;
+    string storedKey;
+    getline(PropertiesFile, storedKey, '\n');
+    getline(PropertiesFile, count, '\n');
+    string HMACSHACode = GetHmacSHAValue(storedKey, count);
+    cout <<"HMAC-SHA1 Code:"<< HMACSHACode << endl;
+    //UpdatePropertiesFile(propertiesFileName, storedKey, count); /*uncomment*/
+    //HMACSHACode = "ffffffffe6f7e1af99f9dcdf6227467b8abce9c0";
+    //HMACSHACode = "00000000e6f7e1af99f9dcdf6227467b8abce9c0";
+    string TruncatedCode = TruncateHMACSHACode(HMACSHACode);
+    string OTPCode = GetOTP(TruncatedCode);
+    cout << OTPCode << endl;
+    return OTPCode;
+  }
+  return "";
+}
+
 int main(int argc, char **argv){
   string msg = "";
   struct sockaddr_in server_addr;     // set server addr and port
@@ -154,18 +174,8 @@ int main(int argc, char **argv){
   if(argc == 1){
     ifstream PropertiesFile(clientPropertiesFile); 
     if(PropertiesFile.good()){
-      string count;
-      string storedKey;
-      getline(PropertiesFile, storedKey, '\n');
-      getline(PropertiesFile, count, '\n');
-      string HMACSHACode = GetHmacSHAValue(storedKey, count);
-      cout <<"HMAC-SHA1 Code:"<< HMACSHACode << endl;
-      //UpdatePropertiesFile(clientPropertiesFile, storedKey, count); /*uncomment*/
-      //HMACSHACode = "ffffffffe6f7e1af99f9dcdf6227467b8abce9c0";
-      //HMACSHACode = "00000000e6f7e1af99f9dcdf6227467b8abce9c0";
-      string TruncatedCode = TruncateHMACSHACode(HMACSHACode);
-      string OPTCode = GetOTP(TruncatedCode);
-      cout << OPTCode << endl;
+      string OTPCode = CalculateOTP(clientPropertiesFile);
+      strcpy(send_buf, OTPCode.c_str());
     }
     else{
       cout << "Need Initialization!" << endl;
