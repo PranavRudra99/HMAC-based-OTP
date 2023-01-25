@@ -27,5 +27,3 @@ util.h
 
 client.cpp: Contains the client code, and can be executed to send an OTP value that's calculated based on the shared key and counter value in ClientProperties.txt
 server.cpp: Contains the server code, and can be executed to verify the received OTP value against the OTP value that's calculated based on the shared key and counter value in ServerProperties.txt
-
-
