@@ -1,10 +1,6 @@
+Compilation:
 cd src
 make
-
-In the src folder, there are 2 cpp files, 1 header file:
-client.cpp
-server.cpp
-util.h
 
 Execution:
 -------------------------------------------------
@@ -23,6 +19,11 @@ After initialization-
 ./client
 -------------------------------------------------
 Note: The server should be running before executing the client.
+
+In the src folder, there are 2 cpp files, 1 header file:
+client.cpp
+server.cpp
+util.h
 
 client.cpp: Contains the client code, and can be executed to send an OTP value that's calculated based on the shared key and counter value in ClientProperties.txt
 server.cpp: Contains the server code, and can be executed to verify the received OTP value against the OTP value that's calculated based on the shared key and counter value in ServerProperties.txt
