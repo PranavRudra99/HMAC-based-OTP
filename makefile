@@ -1,2 +1,2 @@
 compile:
-	g++ client.cpp util.h -L/usr/lib -lssl -lcrypto -o client; g++ server.cpp util.h -L/usr/lib -lssl -lcrypto -o server;
+	g++  util.h client.cpp -L/usr/lib -lssl -lcrypto -o client; g++ util.h server.cpp -L/usr/lib -lssl -lcrypto -o server;

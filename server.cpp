@@ -47,6 +47,38 @@ string FetchOTP(char *buf){
   return str;
 }
 
+int AccountForUnSync(string key, string count, string ReceivedOTPCode){
+  int lowRange = GetLowRange(count);
+  int highRange = GetHighRange(count);
+  //cout << lowRange <<":::::" << highRange << endl;
+  if(lowRange < highRange){
+    for(int i = lowRange; i <= highRange; i++){
+      string countVar = std::to_string(i);
+      string CalculatedOTP = CalculateOTP(key, countVar);
+      if(CalculatedOTP == ReceivedOTPCode){
+        return i;
+      }
+    }
+  }
+  else{
+    for(int i = lowRange; i < max_counter_value; i++){
+      string countVar = std::to_string(i);
+      string CalculatedOTP = CalculateOTP(key, countVar);
+      if(CalculatedOTP == ReceivedOTPCode){
+        return i;
+      }
+    }
+    for(int i = 0; i <= highRange; i++){
+      string countVar = std::to_string(i);
+      string CalculatedOTP = CalculateOTP(key, countVar);
+      if(CalculatedOTP == ReceivedOTPCode){
+        return i;
+      }
+    }
+  }
+  return -1;
+}
+
 int main(int argc, char **argv){
     int server_sockfd;		// server socket fd	
 	struct sockaddr_in server_addr;		// server info struct
@@ -104,9 +136,10 @@ int main(int argc, char **argv){
 		          cout << "Received OTP:" << ReceivedOTPCode << endl;
                           string sharedKey = GetSharedKey(serverPropertiesFile);
                           string count = GetCurrentCount(serverPropertiesFile);
-                          string CalculatedOTPCode = CalculateOTP(sharedKey, count);
-		          UpdatePropertiesFile(serverPropertiesFile, sharedKey, count);
-		          if(CalculatedOTPCode == ReceivedOTPCode){
+                          int code = AccountForUnSync(sharedKey, count, ReceivedOTPCode);
+		          if(code != -1){
+		            count = std::to_string(code);
+		            UpdatePropertiesFile(serverPropertiesFile, sharedKey, count);
 		            strcpy(send_buf, "Accepted");
 		          }
 		          else{

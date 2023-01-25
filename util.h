@@ -21,7 +21,7 @@ using namespace std;
 
 char hex_characters[]={'0','1','2','3','4','5','6','7','8','9','a','b','c','d','e','f'};
 
-int max_counter_val = 4096;
+int max_counter_value = 4096;
 
 int counter_variance = 8;
 
@@ -56,7 +56,7 @@ void GeneratePropertiesFile(string fileName, char* key, int count){
 
 void UpdatePropertiesFile(string fileName, string key, string count){
   int updatedCount = atoi(count.c_str()) + 1;
-  if(updatedCount == max_counter_val){
+  if(updatedCount == max_counter_value){
     updatedCount = 0;
   }
   GeneratePropertiesFile(fileName, (char*)key.c_str(), updatedCount);
@@ -144,6 +144,24 @@ string GetSharedKey(string propertiesFileName){
   return storedKey;
 }
 
+int GetLowRange(string count){
+  int value = atoi(count.c_str());
+  if(value - counter_variance < 0){
+    int diff = counter_variance - value;
+    return max_counter_value - diff;
+  }
+  return value - counter_variance;
+}
+
+int GetHighRange(string count){
+  int value = atoi(count.c_str());
+  if(value + counter_variance >= max_counter_value){
+    int overflow = value + counter_variance - max_counter_value;
+    return overflow;
+  }
+  return value + counter_variance;
+}
+
 string GetCurrentCount(string propertiesFileName){
   string storedKey = "";
   string count = "";
@@ -157,11 +175,9 @@ string GetCurrentCount(string propertiesFileName){
 
 string CalculateOTP(string storedKey, string count){
     string HMACSHACode = GetHmacSHAValue(storedKey, count);
-    cout <<"HMAC-SHA1 Code:"<< HMACSHACode << endl;
-    //HMACSHACode = "ffffffffe6f7e1af99f9dcdf6227467b8abce9c0";
-    //HMACSHACode = "00000000e6f7e1af99f9dcdf6227467b8abce9c0";
+    //cout <<"HMAC-SHA1 Code:"<< HMACSHACode << endl;
     string TruncatedCode = TruncateHMACSHACode(HMACSHACode);
     string OTPCode = GetOTP(TruncatedCode);
-    cout << OTPCode << endl;
+    //cout << OTPCode << endl;
     return OTPCode;
 }
