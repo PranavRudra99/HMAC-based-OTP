@@ -120,8 +120,6 @@ int main(int argc, char **argv){
 			return -1;
 		}
 
-		printf("new client accepted.\n");
-
 		char client_ip[INET_ADDRSTRLEN] = "";
 		inet_ntop(AF_INET, &client_addr.sin_addr, client_ip, INET_ADDRSTRLEN);
 
@@ -141,9 +139,11 @@ int main(int argc, char **argv){
 		            count = std::to_string(code);
 		            UpdatePropertiesFile(serverPropertiesFile, sharedKey, count);
 		            strcpy(send_buf, "Accepted");
+		            cout << "Valid OTP" << endl;
 		          }
 		          else{
 		            strcpy(send_buf, "Rejected");
+		            cout << "Invalid OTP" << endl;
 		          }
 		          send(conn, send_buf, strlen(send_buf), 0);
 		        }
