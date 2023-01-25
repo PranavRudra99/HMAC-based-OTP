@@ -102,7 +102,10 @@ int main(int argc, char **argv){
                           memset(send_buf, '\0', sizeof(send_buf));
 		          string ReceivedOTPCode = FetchOTP(recv_buf);
 		          cout << "Received OTP:" << ReceivedOTPCode << endl;
-		          string CalculatedOTPCode = CalculateOTP(serverPropertiesFile);
+                          string sharedKey = GetSharedKey(serverPropertiesFile);
+                          string count = GetCurrentCount(serverPropertiesFile);
+                          string CalculatedOTPCode = CalculateOTP(sharedKey, count);
+		          UpdatePropertiesFile(serverPropertiesFile, sharedKey, count);
 		          if(CalculatedOTPCode == ReceivedOTPCode){
 		            strcpy(send_buf, "Accepted");
 		          }

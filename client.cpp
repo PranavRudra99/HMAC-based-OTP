@@ -56,7 +56,10 @@ int main(int argc, char **argv){
   if(argc == 1){
     ifstream PropertiesFile(clientPropertiesFile); 
     if(PropertiesFile.good()){
-      string OTPCode = CalculateOTP(clientPropertiesFile);
+      string sharedKey = GetSharedKey(clientPropertiesFile);
+      string count = GetCurrentCount(clientPropertiesFile);
+      string OTPCode = CalculateOTP(sharedKey, count);
+      UpdatePropertiesFile(clientPropertiesFile, sharedKey, count);
       strcpy(send_buf, OTPCode.c_str());
       char server_ip[INET_ADDRSTRLEN]="";
       inet_ntop(AF_INET, &server_addr.sin_addr, server_ip, INET_ADDRSTRLEN);
