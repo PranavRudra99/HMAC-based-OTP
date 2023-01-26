@@ -64,6 +64,7 @@ int main(int argc, char **argv){
       char server_ip[INET_ADDRSTRLEN]="";
       inet_ntop(AF_INET, &server_addr.sin_addr, server_ip, INET_ADDRSTRLEN);
       printf("connected server(%s:%d). \n", server_ip, ntohs(server_addr.sin_port));
+      cout <<"Sending OTP:" << OTPCode << endl;
       send(sock_client, send_buf, strlen(send_buf), 0);
       char recv_buf[65536];
       memset(recv_buf, '\0', sizeof(recv_buf));
