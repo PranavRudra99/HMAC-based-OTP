@@ -130,6 +130,7 @@ string GetOTP(string HexString){
     int mod = 1000000;
     std::istringstream iss(HexString);
     iss >> std::hex >> value;
+    cout << value << endl;
     int val = value%mod;
     string otp = GetPaddedString(val);
     return otp;
@@ -175,9 +176,10 @@ string GetCurrentCount(string propertiesFileName){
 
 string CalculateOTP(string storedKey, string count){
     string HMACSHACode = GetHmacSHAValue(storedKey, count);
-    //cout <<"HMAC-SHA1 Code:"<< HMACSHACode << endl;
+    cout <<"HMAC-SHA1 Code:"<< HMACSHACode << endl;
     string TruncatedCode = TruncateHMACSHACode(HMACSHACode);
+    cout << TruncatedCode << endl;
     string OTPCode = GetOTP(TruncatedCode);
-    //cout << OTPCode << endl;
+    cout << OTPCode << endl;
     return OTPCode;
 }
