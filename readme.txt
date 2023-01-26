@@ -1,3 +1,5 @@
+**I have used the HMAC-SHA1 implementation provided by OpenSSL. So, the OpenSSL development package should be installed for the client/server code to work.**
+
 Compilation:
 cd src
 make
